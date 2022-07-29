@@ -14,6 +14,7 @@ xmap = """\
   <component name="C2" displayname="Dyn C2" color="0,255,0"
     state="started" message="Dynamic component with no group and no parent"
     type="dollar">
+    <father>Main</father>
   </component>
 </xcapptree>
 """
