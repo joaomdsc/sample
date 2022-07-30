@@ -12,6 +12,7 @@ xmap = """\
   </component>
   <component name="C2" displayname="Dyn C2" message="Dynamic component with no group and no parent">
     <father>Main</father>
+    <xcappmessage color=\"123,123,34\">This a dummy message<br>with 2 lines.</xcappmessage>
   </component>
 </xcapptree>
 """
