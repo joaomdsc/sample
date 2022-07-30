@@ -11,8 +11,8 @@ xmap = """\
     <father>Main</father>
   </component>
   <component name="C2" displayname="Dyn C2" message="Dynamic component with no group and no parent">
+    <action value="echo '&lt;xcappmessage&gt;This a dummy message&lt;br&gt;with 2 lines.&lt;/xcappmessage&gt;'" name="check" />
     <father>Main</father>
-    <xcappmessage color=\"123,123,34\">This a dummy message<br>with 2 lines.</xcappmessage>
   </component>
 </xcapptree>
 """
