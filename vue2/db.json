@@ -1,8 +1,8 @@
 {
   "products": [
     { "id": 1, "quantity": 1, "name": "Compass" },
-    { "id": 2, "quantity": 0, "name": "Jacket" },
-    { "id": 3, "quantity": 5, "name": "Hiking socks" },
-    { "id": 4, "quantity": 2, "name": "Suntan lotion" }
+    { "id": 2, "quantity": 0, "name": "Jackets" },
+    { "id": 3, "quantity": 6, "name": "Hiking lotion" },
+    { "id": 4, "quantity": 3, "name": "Suntan socks" }
   ]
 }
