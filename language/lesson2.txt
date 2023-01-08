@@ -1,0 +1,69 @@
+﻿Word
+Definition (en)
+Definition (fr)
+כלב
+dog
+chien
+הולך
+walks, goes (m,s)
+Il marche, il va
+הולכת
+walks, goes (f,s)
+Elle marche, elle va
+אוכל
+eats (m,s)
+Il mange
+אוכלת
+eats (f,s)
+Elle mange
+מלך
+king
+Roi
+כן
+Yes
+Oui
+דרך
+road
+Route
+רואֶה
+sees (m,s)
+Il voit
+רואָה
+sees (f,s)
+Elle voit
+ילדה
+Girl
+Fille
+ילד
+Boy
+garçon
+אישה
+Woman
+femme
+שותֶה
+Drinks (m,s)
+Il boit
+שותָה
+Drinks (f,s)
+Elle boit
+משאית
+Truck
+Camion
+שמח
+Happy
+Heureux
+אגוז
+Nut
+Noix (?)
+אורז
+Rice
+Riz
+זה
+This (m)
+Ceci (m)
+זאת
+This (f)
+Ceci (f)
+גבר
+Man
+homme
