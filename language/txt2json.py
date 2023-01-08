@@ -11,10 +11,10 @@ def txt2json(filename, langs):
         rows = [r.strip() for r in f.readlines()]
 
     d = {
-        'translations': []
+        'words': []
     }
 
-    arr = d['translations']
+    arr = d['words']
 
     if langs == 2:
         nb_elems = int(len(rows)/2)
