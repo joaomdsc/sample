@@ -104,7 +104,7 @@ def maj_status(taskStatus):
         raise RuntimeError(f'[{r.status_code}] {r.text}')
 
 #-------------------------------------------------------------------------------
-# Worker code
+# Fonctions du worker
 #-------------------------------------------------------------------------------
 
 def clean_dict(d):
@@ -120,7 +120,7 @@ def post_task_status(task_instance_id, status, msg, outputs=None):
     Le paramètre "status" peut prendre les valeurs 'InProgress', 'Error', ou
     'Completed'. Cette fonction envoie le status donné à X4B Scenario, où la
     tâche actuellement en cours d'exécution sera mise à jour, avec le status
-    indiqué par la couleur de la pastille dna sle cockpit.
+    indiqué par la couleur de la pastille dans le cockpit.
 
     """
     
@@ -141,18 +141,19 @@ def post_task_status(task_instance_id, status, msg, outputs=None):
         print(e)
         return
 
-    # Return the data in case we want to use it or print it
+    # Renvoie l'objet créé
     return task_status
 
 #-------------------------------------------------------------------------------
 
 class Notification():
-    """Notification object.
+    """Mécanisme de communication pour le code utilisateur.
 
-    This object implements a communication mechanism to allow the python
-    code that implements a task to send notifications to XC Scenario. An
-    instance of this class is passed to each user function, so that the
-    function can invoke the "notify" method.
+    Cette classe fournit un mécanisme de communication qui permet au code
+    python qui implémente une tâche métier d'envoyer des notifications à X4B
+    Scenario. Une instance de cette classe est passée à chaque fonction
+    utilisateur, pour lui permettre d'invoquer la méthode "notifie".
+
     """
     
     def __init__(self, task_instance_id, module_name):
@@ -160,34 +161,37 @@ class Notification():
         self.module_name = module_name
         self.isError = False
 
-    def notify(self, status, msg, outputs=None, progressPercentage=None):
-        """Send a task status to XC Scenario.
+    def notifie(self, status, msg, outputs=None, progressPercentage=None):
+        """Publie un statut de tâche à destination de X4B Scenario.
         
-        The given message will be displayed by XC Scenario in the 
-        "Message" section of the task's screen in the cockpit.
+        La string msg sera affichée par Scenario dans la partie "Message" de
+        l'écran de cette tâche, dans le cockpit Scenario.
+
         """
 
         self.isError = (status == 'Error')
         
-        task_status = post_task_status(self.task_instance_id, status, msg, outputs=outputs)
+        task_status = post_task_status(self.task_instance_id, status, msg,
+                                       outputs=outputs)
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dt} worker: task status (notification) posted')
+        print(f'{dt} worker: notification envoyée')
         print(json.dumps(task_status, indent=4))
 
 #-------------------------------------------------------------------------------
-# work - periodically poll the task queue, retrieve tasks, do the actual work 
+# do_work - le coeur du traitement effectué par le worker
 #-------------------------------------------------------------------------------
 
 def do_work(mod, namespace, autocomplete=True):
-    """Periodically poll the task queue, retrieve tasks, do the actual work.
+    """Ecoute la file d'attente, récupère des tâches, exécute.
 
-    This is the heart of the worker's logic. The code extracts tasks
-    from the task queue, and calls the corresponding function from the
-    user module (if found). If the user function raises an exception,
-    the code will notify XC Scenario by posting an 'InError' status; if
-    it completes normally, without errors, and if the autocomplete flag
-    is activated, the worker code will post the 'Completed' status.
-"""
+    Cette fonction implémente le coeur du traitement effectué par le worker.
+    Dans une boucle infinie, ce code extrait une tâche à la fois depuis la file
+    d'attente et exécute la fonction python associé (si on la trouve dans le
+    module utilisateur). Si le code utilisateur lève une exception, on notifie
+    Scenario en publiant un statut "InError" ; sinon, on publie par défaut le
+    status 'Completed'.
+
+    """
     
     while True:
         # Récupère dans la file d'attente la prochaine tâche à exécuter.
@@ -195,69 +199,68 @@ def do_work(mod, namespace, autocomplete=True):
         # fonction à exécuter ainsi que les valeurs des paramètres d'entrée.
         ti = tache_suivante(namespace)
             
-        # When the queue is empty, there's no exception raised, 'ti' is None
+        # Quand la file est vide, 'ti' revient à None
         if ti is None:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f'{dt} worker[{namespace}]: task queue is empty')
+            print(f'{dt} worker[{namespace}]: aucune tâche en attente')
             sleep(polling_interval)
             continue
 
-        # Get the task for execution from the user's module
+        # Récupère la tâche dans le module utilisateur
         task_name = ti['catalogTaskDefinitionName']
         if task_name not in mod.__dict__:
-            # This is a mismatch between the published catalog, used to create
-            # a scenario definition, and the python module that's supposed to
-            # implement the task. The catalog has advertised a task, but it
-            # can't be found in the module. Log the error.
+            # Il y a une incohérence entre le catalogue qui a été publié, et
+            # qui a servi à la création du scenario dans lequel cette tâche
+            # s'exécute, et le module python qui est censé l'implémenter : le
+            # catalogue annonce une tâche, mais celle-ci ne se trouve pas dans
+            # le module importé.
             print('-'*60)
             dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             namespace = ti['catalogTaskDefinitionNamespace']
-            msg = f'{dt} worker[{namespace}]: unknown task: {namespace}/{task_name}'
+            msg = f'{dt} worker[{namespace}]: tâche inconnue: {namespace}/{task_name}'
             print(msg)
 
-            # From the XC Scenario point of view, the task that we just
-            # extracted from the task queue needs to be flagged as 'Error',
-            # since we couldn't execute it.
+            # Cette tâche ne peut pas s'exécuter, donc on la met en état
+            # d'erreur, au sens de Scenario.
             post_task_status(ti['id'], 'Error', msg)
                 
-            # Back to the loop
+            # Retour à l'écoute de la file
             sleep(polling_interval)
             continue
 
-        # We found the task code, log it.
+        # On a trouvé le code de la fonction demandée, on va pouvoir exécuter
         print('-'*60)
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dt} worker[{namespace}]: calling task "{task_name}"')
+        print(f'{dt} worker[{namespace}]: appel de la tâche "{task_name}"')
         print(json.dumps(ti, indent=4))
 
-        # Remove "#type" from the input data
+        # Nettoyage de quelques paramètres cachés (#type)
         inputs = clean_dict(ti['inputData'])
 
-        # Prepare the notification mechanism, so that user functions can call
-        # notifier.notify() if needed.
-        notifier = Notification(ti['id'], mod.__name__)
+        # Mécanisme de communication pour cette instance de tâche
+        notif = Notification(ti['id'], mod.__name__)
         
-        # Invoke the task_name function from the user module (use module name),
-        # pass the input data, and retrieve a dictionary of output data
-        # (outputValues)
+        # Invocation du code utilisateur: appel de la fonction task_name dans
+        # le module utilisateur, avec les paramètres d'entrée reçus dans la
+        # description de la tâche, et récupération des sorties produites.
         excep = None
         try:
-            outputValues = mod.__dict__[task_name](notifier, **inputs)
+            outputValues = mod.__dict__[task_name](notif, **inputs)
         except Exception as e:
             excep = e
         
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dt} worker[{namespace}]: task {task_name} returned')
+        print(f'{dt} worker[{namespace}]: fin de la tâche "{task_name}"')
 
-        # Si une exception a été levée dans le code utilisateur, on publie un
-        # statut d'erreur dans X4B Scenario
+        # Si une exception a été levée dans le code utilisateur, la tâche doit
+        # être mise en état d'erreur dans X4B Scenario
         if excep is not None:
             print(excep)
             msg = 'Exception levée par la tâche utilisateur'
             post_task_status(ti['id'], 'Error', msg)
             
-        # Notify 'Completed' state only if we have autocomplete enabled
-        if excep is None and not notifier.isError and autocomplete:
+        # Notifie l'état 'Completed' (si autocomplete)
+        if excep is None and not notif.isError and autocomplete:
             post_task_status(ti['id'], 'Completed', '', outputs=outputValues)
 
         # Temps d'attente avant de ré-interroger la file des tâches
@@ -273,30 +276,32 @@ if __name__ == '__main__':
         print(f"""\
 Usage: {sys.argv[0]} <namespace> [ <autocomplete true/false> ]
 
-This code assumes there's a python module, with the same name as the namespace,
-that can be found through python's standard import mechanisms, such as the
-PYTHONPATH variable.""")
+On suppose qu'il existe un module python, avec le même nom que le namespace,
+qui peut être trouvé par les mécanismes standard d'import de modules, comme la
+variable PYTHONPATH.
+""")
         exit(-1)
 
-    # The worker will publish 'Completed' status for every task that finishes
-    # normally (without having thrown any exceptions), unless explicitly
-    # requested here with autocomplete == 'false'
+    # Normalement, le worker se charge de publier un statut 'Completed' quand
+    # les tâches se terminent normalement (sans avoir levé d'exceptions). On
+    # peut modifier ce comportement par défaut en passant ici autocomplete ===
+    # False.
     autocomplete = True
     if len(sys.argv) == 3:
         s = sys.argv[2].lower()
         if s not in ['true', 'false']:
-            print(f'"{sys.argv[2]}" unrecognized boolean value')
+            print(f'"{sys.argv[2]}" booléen attendu')
             exit(-1)
         autocomplete = (s != 'false')
 
-    # The namespace is also the user module name
+    # Le 'namespace' au sens du catalogue identifie aussi le module utilisateur
     namespace = sys.argv[1]
 
-    # Get the user module and publish its catalog
+    # Importe le code utilisateur et publie son catalogue
     mod = __import__(namespace)
     publication_catalogue(mod.task_definitions(), namespace)
 
-    # Poll the task queue and call execution functions
+    # Traitement : écoute de la file d'attente, exécution des tâches
     do_work(mod, namespace, autocomplete=autocomplete)
 
 # End of worker.py
