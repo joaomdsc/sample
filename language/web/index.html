@@ -9,11 +9,18 @@
   <body>
 
     <div id="app">
-      <ul>
-	<li v-for="w in words">
-	  {{ w.he }} {{ w.en }} <span v-if="'fr' in w">{{ w.fr }}</span>
-	</li>
-      </ul>
+      <!-- <ul> -->
+      <!-- 	<li v-for="w in words"> -->
+      <!-- 	  {{ w.he }} {{ w.en }} <span v-if="'fr' in w">{{ w.fr }}</span> -->
+      <!-- 	</li> -->
+      <!-- </ul> -->
+
+      <table>
+	<tr v-for="w in words">
+	  <td><input type="text"></td><td>{{ w.he }}</td><td>{{ w.en }}</td>
+	  <td v-if="'fr' in w">{{ w.fr }}</td>
+	</tr>
+      </table>
     </div>
     
   </body>
