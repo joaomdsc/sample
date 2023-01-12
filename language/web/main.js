@@ -2,16 +2,23 @@ Vue.component('attempt', {
     data: function() {
 	return {
 	    attempt: '',
+	    icon: 'img/circle.svg',
 	}
     },
     props: ['word'],
-    template: '<input v-model.lazy="attempt" v-on:change="changed">',
+    template: `\
+<span>
+    <img :src="icon" height="16" width="16">
+    <input v-model.lazy="attempt" v-on:change="changed">
+</span>`,
     methods: {
 	changed: function() {
 	    console.log(`Attempt="${this.attempt}"` +
 			` ${this.attempt === this.word.he ? 'ok': 'NOK'}`)
+	    this.icon = this.attempt === this.word.he ?
+		'img/check-circle-fill.svg' :
+		'img/x-circle-fill.svg'
 	}
-
     }
 })
 

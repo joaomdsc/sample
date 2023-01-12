@@ -9,15 +9,19 @@
   <body>
 
     <div id="app">
-      <img src="img/check-circle-fill.svg" height="20" width="20">
-      <img src="img/x-circle-fill.svg" height="20" width="20">
-      <table>
-	<tr v-for="w in words">
-	  <td><attempt v-bind:word="w"></td><td>{{ w.he }}</td><td>{{ w.en }}</td>
-	  <td v-if="'fr' in w">{{ w.fr }}</td>
-	</tr>
-      </table>
+      <div style="display: inline-block">
+	<table>
+	  <tr v-for="w in words">
+	    <td><attempt v-bind:word="w"></td><td>{{ w.he }}</td><td>{{ w.en }}</td>
+	    <td v-if="'fr' in w">{{ w.fr }}</td>
+	  </tr>
+	</table>
+      </div>
+      <div style="display: inline-block; vertical-align: top">
+	<img src="img/KB_Hébreu.png" height="200">
+      </div>
     </div>
     
   </body>
 </html>
+
