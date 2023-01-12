@@ -9,15 +9,11 @@
   <body>
 
     <div id="app">
-      <!-- <ul> -->
-      <!-- 	<li v-for="w in words"> -->
-      <!-- 	  {{ w.he }} {{ w.en }} <span v-if="'fr' in w">{{ w.fr }}</span> -->
-      <!-- 	</li> -->
-      <!-- </ul> -->
-
+      <img src="img/check-circle-fill.svg" height="20" width="20">
+      <img src="img/x-circle-fill.svg" height="20" width="20">
       <table>
 	<tr v-for="w in words">
-	  <td><input type="text"></td><td>{{ w.he }}</td><td>{{ w.en }}</td>
+	  <td><attempt v-bind:word="w"></td><td>{{ w.he }}</td><td>{{ w.en }}</td>
 	  <td v-if="'fr' in w">{{ w.fr }}</td>
 	</tr>
       </table>
