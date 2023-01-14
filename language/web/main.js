@@ -26,6 +26,11 @@ const app = new Vue({
     el: '#app',
     data: {
 	words: [],
+	    lesson: 1,
+	    options: [
+		{text: 'Lesson 1', value: 1},
+		{text: 'Lesson 2', value: 2},
+	    ],
     },
     created () {
 	fetch('https://raw.githubusercontent.com/joaomdsc/sample/main/language/lesson2.json')
@@ -33,5 +38,14 @@ const app = new Vue({
 	    .then(x => {
 		this.words = x.words
 	    })
+    },
+    watch: {
+	lesson: function(val) {
+	    fetch(`https://raw.githubusercontent.com/joaomdsc/sample/main/language/lesson${val}.json`)
+		.then(r => r.json())
+		.then(x => {
+		    this.words = x.words
+		})
+	}
     },
 })

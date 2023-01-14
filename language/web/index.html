@@ -9,6 +9,14 @@
   <body>
 
     <div id="app">
+      <div>
+	<select v-model="lesson">
+	  <option v-for="o in options" v-bind:value="o.value">
+	    {{ o.text }}
+	  </option>
+	</select>
+      <span>Selected: {{ lesson }}</span>
+      </div>
       <div style="display: inline-block">
 	<table>
 	  <tr v-for="w in words">
