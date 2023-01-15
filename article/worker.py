@@ -202,7 +202,7 @@ def do_work(mod, namespace, autocomplete=True):
         # Quand la file est vide, 'ti' revient à None
         if ti is None:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f'{dt} worker[{namespace}]: aucune tâche en attente')
+            print(f'{dt} [{namespace}]: aucune tâche en attente')
             sleep(polling_interval)
             continue
 
@@ -217,7 +217,7 @@ def do_work(mod, namespace, autocomplete=True):
             print('-'*60)
             dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             namespace = ti['catalogTaskDefinitionNamespace']
-            msg = f'{dt} worker[{namespace}]: tâche inconnue: {namespace}/{task_name}'
+            msg = f'{dt} [{namespace}]: tâche inconnue: {namespace}/{task_name}'
             print(msg)
 
             # Cette tâche ne peut pas s'exécuter, donc on la met en état
@@ -231,7 +231,7 @@ def do_work(mod, namespace, autocomplete=True):
         # On a trouvé le code de la fonction demandée, on va pouvoir exécuter
         print('-'*60)
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dt} worker[{namespace}]: appel de la tâche "{task_name}"')
+        print(f'{dt} [{namespace}]: appel de la tâche "{task_name}"')
         print(json.dumps(ti, indent=4))
 
         # Nettoyage de quelques paramètres cachés (#type)
@@ -250,7 +250,8 @@ def do_work(mod, namespace, autocomplete=True):
             excep = e
         
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dt} worker[{namespace}]: fin de la tâche "{task_name}"')
+        print(f'{dt} [{namespace}]: fin de la tâche "{task_name}"')
+        print(f'{dt} [{namespace}]: sortie: {json.dumps(outputValues, indent=4)}')
 
         # Si une exception a été levée dans le code utilisateur, la tâche doit
         # être mise en état d'erreur dans X4B Scenario
