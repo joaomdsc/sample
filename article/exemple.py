@@ -10,7 +10,7 @@ from time import sleep
 # disposition du concepteur de scenarios, pour être appelées par le worker.
 
 def simple(x4b, arg):
-    """Une fonction qui renvoiement simplement son argument."""
+    """Une fonction qui renvoie simplement son argument."""
     print(f'[{__name__}] sbimple: arg={arg}')
 
     # Début traitement spécifique
@@ -22,7 +22,7 @@ def simple(x4b, arg):
 #-------------------------------------------------------------------------------
 
 def double(x4b, str_in, nbr_in):
-    """Une fonction qui illustre ."""
+    """Une fonction qui illustre un traitement spécifique."""
     print(f'[{__name__}] double: entrées: str_in={str_in}, nbr_in={nbr_in}')
 
     # Début traitement spécifique
@@ -40,42 +40,36 @@ def double(x4b, str_in, nbr_in):
 #-------------------------------------------------------------------------------
 
 def reporting_task(x4b, n, param):
-    """A long-running task that periodically reports its progress."""
+    """Une tâche qui notifie périodiquement son avancement."""
     print(f'[{__name__}] reporting_task: n={n}, param={param}')
 
-    # Numeric parameters should always be tested
+    # Vérification d'un paramètre numérique
     try:
         n = int(n)
     except ValueError:
-        msg = f'Incorrect value "{n}" for n, should be integer'
+        msg = f'Valeur "{n}" incorrecte, devrait être un entier'
         x4b.notifie('Error', msg)
         return {}
     
-    msg = f'Input "{param}": going to sleep for {n} seconds.'
+    # Début de traitement "long"
+    msg = f'Input "{param}": en pause pendant {n} secondes.'
     x4b.notifie('InProgress', msg, progressPercentage=str(0.0))
 
     for i in range(n):
         sleep(1)
         x4b.notifie('InProgress', str(i+1), progressPercentage=str((i+1)/n))
 
-    msg = f'Waking up.'
+    msg = f'Terminé.'
     x4b.notifie('InProgress', msg)
-    return {'result': f'Input "{param}", result is ok'}
+    # Fin du traitement "long"
 
-#-------------------------------------------------------------------------------
-
-def error_placeholder(x4b):
-    """Send an error status"""
-    print(f'[{__name__}] error_placeholder: FATAL error')
-    msg = 'Task "error_placeholder" reports a fatal error.'
-    x4b.notifie('Error', msg)
-    return {}
+    return {'result': f'Input "{param}", result correct.'}
 
 #-------------------------------------------------------------------------------
 
 def zero_division(x4b):
-    """Force a python exception"""
-    print(f'[{__name__}] zero_division: force a division by zero')
+    """Force une exception python"""
+    print(f'[{__name__}] zero_division: force une exception en divisant par zéro')
     return {'x': 1/0}
 
 #-------------------------------------------------------------------------------
@@ -83,14 +77,15 @@ def zero_division(x4b):
 #-------------------------------------------------------------------------------
 
 def task_definitions():
-    """Return the array of XC Scenario task definition objects.
+    """Retourne le tableau des définitions de tâches/fonctions.
     
-    This array must have one element for each task, i.e. for each function
-    implemented in the Task implementations section above. Each element is a
-    python version of the CatalogTaskDefinition JSON object defined in the REST
-    API definition, see
-    https://scenario.xcomponent.com/taskcatalog/swagger/ui/index, POST
-    /api/catalog-task-definitions/{namespace} operation.
+    Le tableau produit doit avoir une entrée par tâche, i.e. une pour chaque
+    fonction définie au-dessus. Chaque entrée est la version python de l'objet
+    appelé CatalogTaskDefinition dans le swagger, et chaque paramètre d'entrée
+    ou de sortie est la version python de l'objet CatalogParameterType. URL du
+    swagger :
+
+    https://scenario.xcomponent.com/taskcatalog/swagger/ui/index
 
     """
 
@@ -98,7 +93,7 @@ def task_definitions():
 
     #---------------------------------------------------------------------------
 
-    # simple - a simple task that echoes its input argument
+    # simple - une fonction qui renvoie simplement son argument
     task = {
         'namespace': __name__,
         'name': 'simple',
@@ -119,7 +114,7 @@ def task_definitions():
 
     #---------------------------------------------------------------------------
 
-    # double - immediate task
+    # double - une fonction qui illustre un traitement spécifique
     task = {
         'namespace': __name__,
         'name': 'double',
@@ -150,7 +145,7 @@ def task_definitions():
 
     #---------------------------------------------------------------------------
 
-    # reporting_task - a long-running task that reports its progress
+    # reporting_task - une tâche qui notifie périodiquement son avancement
     task = {
         'namespace': __name__,
         'name': 'reporting_task',
@@ -175,16 +170,7 @@ def task_definitions():
 
     #---------------------------------------------------------------------------
 
-    # error_placeholder - force an error status
-    task = {
-        'namespace': __name__,
-        'name': 'error_placeholder',
-    }
-    task_defs.append(task)
-
-    #---------------------------------------------------------------------------
-
-    # zero_division - force a python exception
+    # zero_division - force une exception python
     task = {
         'namespace': __name__,
         'name': 'zero_division',
@@ -194,7 +180,7 @@ def task_definitions():
 
     #---------------------------------------------------------------------------
 
-    # Return the array of task definitions
+    # Retourne le tableau des définitions de tâches
     return task_defs
 
 #-------------------------------------------------------------------------------
