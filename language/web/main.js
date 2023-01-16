@@ -33,7 +33,9 @@ const app = new Vue({
 	    ],
     },
     created () {
-	fetch('https://raw.githubusercontent.com/joaomdsc/sample/main/language/lesson2.json')
+	// FIXME La référence à {lesson} ne marche pas, pourquoi ? data pas encore dispo lors du created ?
+	// fetch('https://raw.githubusercontent.com/joaomdsc/sample/main/language/lesson{lesson}.json')
+	fetch('https://raw.githubusercontent.com/joaomdsc/sample/main/language/lesson1.json')
 	    .then(r => r.json())
 	    .then(x => {
 		this.words = x.words
