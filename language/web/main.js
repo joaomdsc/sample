@@ -26,11 +26,17 @@ const app = new Vue({
     el: '#app',
     data: {
 	words: [],
-	    lesson: 1,
-	    options: [
-		{text: 'Lesson 1', value: 1},
-		{text: 'Lesson 2', value: 2},
-	    ],
+	lesson: 1,
+	options: [
+	    {text: 'Lesson 1', value: 1},
+	    {text: 'Lesson 2', value: 2},
+	],
+	fontName: 'Calibri',
+	fonts: [
+	    'Calibri',
+	    'Narkisim',
+	    'Cafe',
+	],
     },
     created () {
 	// FIXME La référence à {lesson} ne marche pas, pourquoi ? data pas encore dispo lors du created ?
@@ -41,6 +47,14 @@ const app = new Vue({
 		this.words = x.words
 	    })
     },
+    // FIXME computed or watch ?
+    computed: {
+	hebrewStyle: function() {
+	    return {
+		'fontFamily': this.fontName,
+	    }
+	},
+    },
     watch: {
 	lesson: function(val) {
 	    fetch(`https://raw.githubusercontent.com/joaomdsc/sample/main/language/lesson${val}.json`)
@@ -48,6 +62,6 @@ const app = new Vue({
 		.then(x => {
 		    this.words = x.words
 		})
-	}
+	},
     },
 })

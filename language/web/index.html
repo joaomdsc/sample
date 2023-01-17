@@ -9,22 +9,40 @@
   <body>
 
     <div id="app">
+      <!-- Choose a lesson to work on -->
       <div>
 	<select v-model="lesson">
 	  <option v-for="o in options" v-bind:value="o.value">
 	    {{ o.text }}
 	  </option>
 	</select>
-      <span>Selected: {{ lesson }}</span>
+      <span>Lesson: {{ lesson }}</span>
       </div>
+
+      <!-- Font to display  -->
+      <div>
+	<select v-model="fontName">
+	  <option v-for="f in fonts" v-bind:value="f">
+	    {{ f }}
+	  </option>
+	</select>
+      <span>Font: {{ fontName }}</span>
+      </div>
+
+      <!-- The language exercise itself -->
       <div style="display: inline-block">
 	<table>
 	  <tr v-for="w in words">
-	    <td><attempt v-bind:word="w"></td><td>{{ w.he }}</td><td>{{ w.en }}</td>
+	    <td><attempt v-bind:word="w"></td>
+	    <td id="hebrew" v-bind:style="hebrewStyle">{{ w.he }}</td>
+	    <!-- <td id="hebrew" style="font-family: Cafe">{{ w.he }}</td> -->
+	    <td>{{ w.en }}</td>
 	    <td v-if="'fr' in w">{{ w.fr }}</td>
 	  </tr>
 	</table>
       </div>
+
+      <!-- An image if the hebrew mappings on a french keyboard -->
       <div style="display: inline-block; vertical-align: top">
 	<img src="img/KB_Hébreu.png" height="200">
       </div>
