@@ -16,6 +16,7 @@ import json
 import requests
 from time import sleep
 from datetime import datetime
+from importlib import import_module
 
 #-------------------------------------------------------------------------------
 # Configuration / environnement
@@ -208,7 +209,7 @@ def do_work(mod, namespace, autocomplete=True):
 
         # Récupère la tâche dans le module utilisateur
         task_name = ti['catalogTaskDefinitionName']
-        if task_name not in mod.__dict__:
+        if not hasattr(mod, task_name):
             # Il y a une incohérence entre le catalogue qui a été publié, et
             # qui a servi à la création du scenario dans lequel cette tâche
             # s'exécute, et le module python qui est censé l'implémenter : le
@@ -216,8 +217,8 @@ def do_work(mod, namespace, autocomplete=True):
             # le module importé.
             print('-'*60)
             dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            namespace = ti['catalogTaskDefinitionNamespace']
-            msg = f'{dt} [{namespace}]: tâche inconnue: {namespace}/{task_name}'
+            task_namespace = ti['catalogTaskDefinitionNamespace']
+            msg = f'{dt} [{namespace}]: tâche inconnue: {task_namespace}/{task_name}'
             print(msg)
 
             # Cette tâche ne peut pas s'exécuter, donc on la met en état
@@ -245,7 +246,7 @@ def do_work(mod, namespace, autocomplete=True):
         # description de la tâche, et récupération des sorties produites.
         excep = None
         try:
-            outputValues = mod.__dict__[task_name](notif, **inputs)
+            outputValues = getattr(mod, task_name)(notif, **inputs)
         except Exception as e:
             excep = e
         
@@ -298,8 +299,8 @@ variable PYTHONPATH.
     # Le 'namespace' au sens du catalogue identifie aussi le module utilisateur
     namespace = sys.argv[1]
 
-    # Importe le code utilisateur et publie son catalogue
-    mod = __import__(namespace)
+    # Importe le code utilisateur (avec importlib) et publie son catalogue
+    mod = import_module(namespace)
     publication_catalogue(mod.task_definitions(), namespace)
 
     # Traitement : écoute de la file d'attente, exécution des tâches
