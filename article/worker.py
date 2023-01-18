@@ -157,9 +157,9 @@ class Notification():
 
     """
     
-    def __init__(self, task_instance_id, module_name):
+    def __init__(self, task_instance_id, namespace):
         self.task_instance_id = task_instance_id
-        self.module_name = module_name
+        self.namespace = namespace
         self.isError = False
 
     def notifie(self, status, msg, outputs=None, progressPercentage=None):
@@ -175,8 +175,8 @@ class Notification():
         task_status = post_task_status(self.task_instance_id, status, msg,
                                        outputs=outputs)
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dt} worker: notification envoyée')
-        print(json.dumps(task_status, indent=4))
+        print(f'{dt} [{namespace}]: notification {status} envoyée')
+        print(json.dumps(task_status, indent=4, ensure_ascii=False))
 
 #-------------------------------------------------------------------------------
 # do_work - le coeur du traitement effectué par le worker
@@ -239,7 +239,7 @@ def do_work(mod, namespace, autocomplete=True):
         inputs = clean_dict(ti['inputData'])
 
         # Mécanisme de communication pour cette instance de tâche
-        notif = Notification(ti['id'], mod.__name__)
+        notif = Notification(ti['id'], namespace)
         
         # Invocation du code utilisateur: appel de la fonction task_name dans
         # le module utilisateur, avec les paramètres d'entrée reçus dans la
@@ -249,16 +249,20 @@ def do_work(mod, namespace, autocomplete=True):
             outputValues = getattr(mod, task_name)(notif, **inputs)
         except Exception as e:
             excep = e
-        
+
+        # Tracer le retour de la fonction et les sorties
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f'{dt} [{namespace}]: fin de la tâche "{task_name}"')
-        print(f'{dt} [{namespace}]: sortie: {json.dumps(outputValues, indent=4)}')
+        if excep is None:
+            s = json.dumps(outputValues, indent=4, ensure_ascii=False)
+            print(f'{dt} [{namespace}]: sortie: {s}')
+        print(f'#{"-"*60}')
 
         # Si une exception a été levée dans le code utilisateur, la tâche doit
         # être mise en état d'erreur dans X4B Scenario
         if excep is not None:
             print(excep)
-            msg = 'Exception levée par la tâche utilisateur'
+            msg = f'Exception levée par la tâche utilisateur: "{excep}"'
             post_task_status(ti['id'], 'Error', msg)
             
         # Notifie l'état 'Completed' (si autocomplete)

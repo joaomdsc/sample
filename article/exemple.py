@@ -52,18 +52,19 @@ def reporting_task(x4b, n, param):
         return {}
     
     # Début de traitement "long"
-    msg = f'Input "{param}": en pause pendant {n} secondes.'
+    msg = f'Input param = "{param}", nombre d\'itérations = {n}.'
     x4b.notifie('InProgress', msg, progressPercentage=str(0.0))
 
     for i in range(n):
         sleep(1)
         x4b.notifie('InProgress', str(i+1), progressPercentage=str((i+1)/n))
 
-    msg = f'Terminé.'
+    msg = f'Fin d\'exécution de la tâche "reporting_task".'
     x4b.notifie('InProgress', msg)
     # Fin du traitement "long"
 
-    return {'result': f'Input "{param}", result correct.'}
+    # Un seul paramètre de sortie, de type string
+    return {'result': f'Traitement correctement terminé.'}
 
 #-------------------------------------------------------------------------------
 
